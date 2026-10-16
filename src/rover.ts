@@ -3,10 +3,25 @@ export {};
 const canvas = document.querySelector<HTMLCanvasElement>("#rover-canvas")!;
 const ctx = canvas.getContext("2d")!;
 const readout = document.querySelector<HTMLParagraphElement>("#rover-readout")!;
+
 const headings = ["North", "East", "South", "West"];
-let right = 2;
-let forward = 2;
-let direction = 0;
+
+let currentX = 2;
+let currentY = 2;
+let currentDirection = 0; // North
+
+type Direction = {
+  direction: number;
+  dx: number;
+  dy: number;
+};
+
+const directions: Direction[] = [
+  { direction: 0, dx: 0, dy: -1 }, // NORTH
+  { direction: 1, dx: 1, dy: 0 }, // EAST
+  { direction: 2, dx: 0, dy: +1 }, // SOUTH
+  { direction: 3, dx: -1, dy: 0 }, // WEST
+];
 
 function drawRover() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -17,8 +32,8 @@ function drawRover() {
     }
   }
   ctx.save();
-  ctx.translate(38 + right * 56, 38 + forward * 56);
-  ctx.rotate(direction * Math.PI / 2);
+  ctx.translate(38 + currentX * 56, 38 + currentY * 56);
+  ctx.rotate(currentDirection * Math.PI / 2);
   ctx.fillStyle = "#27766b";
   ctx.beginPath();
   ctx.moveTo(0, -20);
@@ -27,8 +42,8 @@ function drawRover() {
   ctx.closePath();
   ctx.fill();
   ctx.restore();
-  readout.textContent = `Position: (${right}, ${forward}) · Facing: ${
-    headings[direction]
+  readout.textContent = `Position: (${currentX}, ${currentY}) · Facing: ${
+    headings[currentDirection]
   }`;
 }
 
@@ -38,16 +53,20 @@ type Command = {
 
 const forwardCommand: Command = {
   execute: () => {
-    if (direction === 0) forward = Math.max(0, forward - 1);
-    if (direction === 1) right = Math.min(4, right + 1);
-    if (direction === 2) forward = Math.min(4, forward + 1);
-    if (direction === 3) right = Math.max(0, right - 1);
+    currentX = Math.max(
+      0,
+      Math.min(4, currentX + directions[currentDirection].dx),
+    );
+    currentY = Math.max(
+      0,
+      Math.min(4, currentY + directions[currentDirection].dy),
+    );
   },
 };
 
 const rightCommand: Command = {
   execute: () => {
-    direction = (direction + 1) % 4;
+    currentDirection = (currentDirection + 1) % 4;
   },
 };
 
@@ -63,9 +82,9 @@ document.querySelector<HTMLButtonElement>("#rover-right")!.onclick = () => {
   runCommand(rightCommand);
 };
 document.querySelector<HTMLButtonElement>("#rover-reset")!.onclick = () => {
-  right = 2;
-  forward = 2;
-  direction = 0;
+  currentX = 2;
+  currentY = 2;
+  currentDirection = 0;
   drawRover();
 };
 drawRover();
