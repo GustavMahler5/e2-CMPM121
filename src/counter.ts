@@ -62,7 +62,6 @@ function setCount(next: number) {
 }
 
 shieldEvents.addEventListener("shieldChanged", () => {
-  if (panel) updateStats();
   drawMeter(getCurrentShield());
 });
 
@@ -80,10 +79,12 @@ document.querySelector<HTMLButtonElement>("#counter-open")!.onclick = () => {
   panel = document.createElement("p");
   host.append(panel);
   renderStats(getCurrentShield());
+  shieldEvents.addEventListener("shieldChanged", updateStats);
 };
 document.querySelector<HTMLButtonElement>("#counter-close")!.onclick = () => {
   if (!panel) return;
   panel.remove();
   panel = null;
+  shieldEvents.removeEventListener("shieldChanged", updateStats);
 };
 drawMeter(getCurrentShield());
