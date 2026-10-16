@@ -47,11 +47,27 @@ function drawRover() {
   }`;
 }
 
+const queueList = document.querySelector<HTMLOListElement>(
+  "#rover-queue-status",
+)!;
+
+function displayQueue() {
+  queueList.replaceChildren();
+
+  for (const command of commandQueue) {
+    const item = document.createElement("li");
+    item.textContent = command.label;
+    queueList.appendChild(item);
+  }
+}
+
 type Command = {
+  label: string;
   execute: () => void;
 };
 
 const forwardCommand: Command = {
+  label: "Forward",
   execute: () => {
     currentX = Math.max(
       0,
@@ -65,26 +81,48 @@ const forwardCommand: Command = {
 };
 
 const rightCommand: Command = {
+  label: "Right",
   execute: () => {
     currentDirection = (currentDirection + 1) % 4;
   },
 };
 
-function runCommand(command: Command) {
-  command.execute();
+const commandQueue: Command[] = [];
+
+function clearQueue() {
+  commandQueue.length = 0;
+}
+
+function runCommands(commands: Command[]) {
+  for (const command of commands) {
+    command.execute();
+  }
+  clearQueue();
   drawRover();
 }
 
 document.querySelector<HTMLButtonElement>("#rover-forward")!.onclick = () => {
-  runCommand(forwardCommand);
+  commandQueue.push(forwardCommand);
+  displayQueue();
 };
 document.querySelector<HTMLButtonElement>("#rover-right")!.onclick = () => {
-  runCommand(rightCommand);
+  commandQueue.push(rightCommand);
+  displayQueue();
 };
 document.querySelector<HTMLButtonElement>("#rover-reset")!.onclick = () => {
   currentX = 2;
   currentY = 2;
   currentDirection = 0;
+  clearQueue();
+  displayQueue();
   drawRover();
+};
+document.querySelector<HTMLButtonElement>("#rover-run")!.onclick = () => {
+  runCommands(commandQueue);
+  displayQueue();
+};
+document.querySelector<HTMLButtonElement>("#rover-clear")!.onclick = () => {
+  clearQueue();
+  displayQueue();
 };
 drawRover();
