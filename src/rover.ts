@@ -4,8 +4,8 @@ const canvas = document.querySelector<HTMLCanvasElement>("#rover-canvas")!;
 const ctx = canvas.getContext("2d")!;
 const readout = document.querySelector<HTMLParagraphElement>("#rover-readout")!;
 const headings = ["North", "East", "South", "West"];
-let x = 2;
-let y = 2;
+let right = 2;
+let forward = 2;
 let direction = 0;
 
 function drawRover() {
@@ -17,7 +17,7 @@ function drawRover() {
     }
   }
   ctx.save();
-  ctx.translate(38 + x * 56, 38 + y * 56);
+  ctx.translate(38 + right * 56, 38 + forward * 56);
   ctx.rotate(direction * Math.PI / 2);
   ctx.fillStyle = "#27766b";
   ctx.beginPath();
@@ -27,25 +27,44 @@ function drawRover() {
   ctx.closePath();
   ctx.fill();
   ctx.restore();
-  readout.textContent = `Position: (${x}, ${y}) · Facing: ${
+  readout.textContent = `Position: (${right}, ${forward}) · Facing: ${
     headings[direction]
   }`;
 }
 
-document.querySelector<HTMLButtonElement>("#rover-forward")!.onclick = () => {
-  if (direction === 0) y = Math.max(0, y - 1);
-  if (direction === 1) x = Math.min(4, x + 1);
-  if (direction === 2) y = Math.min(4, y + 1);
-  if (direction === 3) x = Math.max(0, x - 1);
+type Command = {
+  execute: () => void;
+};
+
+const forwardCommand: Command = {
+  execute: () => {
+    if (direction === 0) forward = Math.max(0, forward - 1);
+    if (direction === 1) right = Math.min(4, right + 1);
+    if (direction === 2) forward = Math.min(4, forward + 1);
+    if (direction === 3) right = Math.max(0, right - 1);
+  },
+};
+
+const rightCommand: Command = {
+  execute: () => {
+    direction = (direction + 1) % 4;
+  },
+};
+
+function runCommand(command: Command) {
+  command.execute();
   drawRover();
+}
+
+document.querySelector<HTMLButtonElement>("#rover-forward")!.onclick = () => {
+  runCommand(forwardCommand);
 };
 document.querySelector<HTMLButtonElement>("#rover-right")!.onclick = () => {
-  direction = (direction + 1) % 4;
-  drawRover();
+  runCommand(rightCommand);
 };
 document.querySelector<HTMLButtonElement>("#rover-reset")!.onclick = () => {
-  x = 2;
-  y = 2;
+  right = 2;
+  forward = 2;
   direction = 0;
   drawRover();
 };
