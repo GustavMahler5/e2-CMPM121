@@ -26,6 +26,24 @@ function calculateShift(producers: number): shiftResults {
   };
 }
 
+type graphRows = {
+  label: string;
+  value: number;
+  color: string;
+};
+
+function drawData(dataArray: graphRows[]) {
+  dataArray.forEach((data, index) => {
+    const row = 102 + index * 52;
+
+    ctx.fillStyle = "#233e43";
+    ctx.fillText(`${data.label}: ${data.value}`, 18, row);
+
+    ctx.fillStyle = data.color;
+    ctx.fillRect(18, row + 8, data.value * 14, 20);
+  });
+}
+
 function writeReadout(shift: shiftResults) {
   readout.textContent =
     `Assigned: ${shift.producers}/6 · Production: ${shift.production} · Consumption: ${shift.consumption} · Balance: ${
@@ -42,16 +60,21 @@ function drawGraph(shift: shiftResults) {
     ctx.font = "16px system-ui";
     ctx.fillText(String(i + 1), 31 + i * 45, 40);
   }
-  ctx.fillStyle = "#233e43";
-  ctx.font = "14px system-ui";
-  ctx.fillText(`Producers: ${shift.producers} / 6`, 18, 76);
-  ctx.fillText(`Production: ${shift.production}`, 18, 102);
-  ctx.fillStyle = "#27766b";
-  ctx.fillRect(18, 110, shift.production * 14, 20);
-  ctx.fillStyle = "#233e43";
-  ctx.fillText(`Consumption: ${shift.consumption}`, 18, 154);
-  ctx.fillStyle = "#a44d23";
-  ctx.fillRect(18, 162, shift.consumption * 14, 20);
+
+  const data: graphRows[] = [
+    {
+      label: "Production",
+      value: shift.production,
+      color: "#27766b",
+    },
+    {
+      label: "Consumption",
+      value: shift.consumption,
+      color: "#a44d23",
+    },
+  ];
+
+  drawData(data);
 }
 
 let currentProducers = 2;
