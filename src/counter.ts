@@ -20,6 +20,8 @@ type ShieldSnapshot = {
   missing: number;
 };
 
+const shieldEvents = new EventTarget();
+
 function getCurrentShield(): ShieldSnapshot {
   return {
     charge: count,
@@ -56,9 +58,13 @@ function setCount(next: number) {
   const bounded = Math.max(0, Math.min(MAX_SHIELD, next));
   if (bounded === count) return;
   count = bounded;
-  drawMeter(getCurrentShield());
-  if (panel) updateStats();
+  shieldEvents.dispatchEvent(new Event("shieldChanged"));
 }
+
+shieldEvents.addEventListener("shieldChanged", () => {
+  if (panel) updateStats();
+  drawMeter(getCurrentShield());
+});
 
 document.querySelector<HTMLButtonElement>("#counter-less")!.onclick = () => {
   setCount(count - 1);
